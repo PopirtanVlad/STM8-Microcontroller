@@ -8,24 +8,24 @@ ENTITY Stack_Pointer IS
 	PORT (
 		Clk : IN STD_LOGIC;
 		Rst : IN STD_LOGIC;
-		Enable : IN STD_LOGIC;
-		Load : IN STD_LOGIC;
 		Push : IN std_logic;
 		Pop : IN std_logic;
-		Input : IN STD_LOGIC_VECTOR(15 DOWNTO 0);
-		Output : OUT STD_LOGIC_VECTOR(15 DOWNTO 0);
+		Input : IN STD_LOGIC_VECTOR(7 DOWNTO 0);
+		Output : OUT STD_LOGIC_VECTOR(7 DOWNTO 0);
 		stack_full : OUT std_logic;
 		stack_empty : OUT std_logic
 	);
 END Stack_Pointer;
 
 ARCHITECTURE Behavioral OF Stack_Pointer IS
-	SIGNAL stackCursor : std_logic_vector(15 DOWNTO 0) := std_logic_vector(to_unsigned(255, 15));
-	CONSTANT upperLimit : std_logic_vector(15 DOWNTO 0) := (OTHERS => '0');
-	CONSTANT lowerLimit : std_logic_vector(15 DOWNTO 0) := std_logic_vector(to_unsigned(255, 15));
+	TYPE RAMTYPE IS ARRAY (255 DOWNTO 0) OF std_logic_vector(7 DOWNTO 0);
+	SIGNAL stack : RAMTYPE := (OTHERS => (OTHERS => '0'));
+	SIGNAL stackCursor : integer := 255;
+	CONSTANT upperLimit : integer := 0;
+	CONSTANT lowerLimit : integer := 255;
 	SIGNAL empty, full : std_logic := '0';
 BEGIN
-	Output <= stackCursor;
+	Output <= stack(stackCursor);
 	stack_full <= full;
 	stack_empty <= empty;
  
@@ -48,16 +48,12 @@ BEGIN
 		IF clk'EVENT AND clk = '1' THEN
 			IF Rst = '1' THEN
 				stackCursor <= lowerLimit;
-			ELSIF Enable = '1' THEN
-				IF Load = '1' THEN
-					stackCursor <= Input;
-				END IF;
-				IF pop = '1' AND empty = '0' THEN
+				stack(stackCursor)<=(others=>'0');
+			ELSIF pop = '1' AND empty = '0' THEN
 					stackCursor <= stackCursor + 1;
-				END IF;
-				IF push = '1' AND full = '0' THEN
-					stackCursor <= stackCursor - 1;
-				END IF;
+			ELSIF push = '1' AND full = '0' THEN
+				stackCursor <= stackCursor - 1;
+				stack(stackCursor)<=Input;
 			END IF;
 		END IF;
 	END PROCESS;

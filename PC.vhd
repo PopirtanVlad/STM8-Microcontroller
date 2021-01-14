@@ -8,9 +8,7 @@ ENTITY PC IS
 		Clk : IN STD_LOGIC;
 		Rst : IN STD_LOGIC;
 		En : IN STD_LOGIC;
-		br : IN STD_LOGIC;
 		jmp : IN STD_LOGIC;
-		bra : in STD_LOGIC_VECTOR (23 downto 0);
         jmpa : in STD_LOGIC_VECTOR (23 downto 0);
 		Output : OUT STD_LOGIC_VECTOR (23 DOWNTO 0)
 	);
@@ -28,19 +26,10 @@ BEGIN
 			IF Rst = '1' THEN
 				temp <= (OTHERS => '0');
 			ELSIF En = '1' THEN
-				temp <= branch_output; 
+				temp <= jump_output; 
 			END IF;
 		END IF;
 	END PROCESS;
-	
-	process(br)
-	begin
-	   if br='1' then
-	       branch_output<=bra;
-	   else
-	       branch_output<=jump_output;
-	   end if;
-	end process;
 	
 	process(jmp)
 	begin
